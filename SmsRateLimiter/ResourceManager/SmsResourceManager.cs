@@ -1,6 +1,6 @@
-﻿// Thread safe singleton to manage requests by phone number
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
+// Thread safe singleton to manage requests by phone number
 public class SmsResourceManager
 {
     // Phone numbers are the keys
