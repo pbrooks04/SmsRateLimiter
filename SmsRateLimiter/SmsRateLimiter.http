@@ -1,6 +1,14 @@
 @SmsRateLimiter_HostAddress = http://localhost:5046
 
-GET {{SmsRateLimiter_HostAddress}}/weatherforecast/
+GET {{SmsRateLimiter_HostAddress}}/history
 Accept: application/json
+
+
+POST {{SmsRateLimiter_HostAddress}}/api/sms/send?accountId=12345
+Accept: application/json
+{
+  "phoneNumber": "0123456789",
+  "message": "Hello there"
+}
 
 ###
