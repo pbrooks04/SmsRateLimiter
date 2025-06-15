@@ -1,10 +1,16 @@
 ﻿using SmsRateLimiter.Api.SmsResources;
+using SmsRateLimiter.History;
 
 public static class SmsHandler
 {
     private static readonly HttpClient _client = new HttpClient();
 
-    public static async Task<IResult> SendSms(HttpContext context, SmsRequest request, SmsResourceManager resourceManager)
+    public static async Task<IResult> SendSms(
+        HttpContext context, 
+        SmsRequest request, 
+        SmsResourceManager resourceManager,
+        HistoryLog historyLog
+    )
     {
         if (request == null || string.IsNullOrWhiteSpace(request.PhoneNumber))
         {
@@ -12,7 +18,9 @@ public static class SmsHandler
         }
 
         var accountId = context.Request.Query["accountId"].ToString();
-        Console.WriteLine($"Handler received accountId: {accountId}");
+
+        // Store a record of the event
+        historyLog.AddEntry(request, accountId);
 
         var resource = resourceManager.GetOrCreate(request.PhoneNumber);
 

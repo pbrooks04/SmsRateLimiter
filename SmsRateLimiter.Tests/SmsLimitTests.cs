@@ -27,7 +27,7 @@ namespace SmsRateLimiter.Tests
         {
             var response = await client.PostAsJsonAsync(
                 "/api/sms/send",
-                new SmsRequest("1234567890", "123", "Hello there")
+                new SmsRequest("1234567890", "Hello there")
             );
 
             response.EnsureSuccessStatusCode();
@@ -46,7 +46,7 @@ namespace SmsRateLimiter.Tests
             {
                 var response = await client.PostAsJsonAsync(
                     "/api/sms/send",
-                    new SmsRequest("1234567890", "123", "Hello there")
+                    new SmsRequest("1234567890", "Hello there")
                 );
 
                 response.EnsureSuccessStatusCode();
@@ -62,7 +62,7 @@ namespace SmsRateLimiter.Tests
             // Send another request and ensure that it is rejected
             var failingResponse = await client.PostAsJsonAsync(
                 "/api/sms/send",
-                new SmsRequest("1234567890", "123", "Hello there")
+                new SmsRequest("1234567890", "Hello there")
             );
 
             Assert.That(failingResponse.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));

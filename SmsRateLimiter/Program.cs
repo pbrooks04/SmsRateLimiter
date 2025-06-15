@@ -1,4 +1,5 @@
 using SmsRateLimiter.Api;
+using SmsRateLimiter.History;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,10 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddSingleton<SmsResourceManager>();
+builder.Services.AddSingleton<HistoryLog>();
+
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddPolicy("SmsSendPolicy", httpContext =>
+    options.AddPolicy("RateLimitPolicy", httpContext =>
     {
         var accountId = httpContext.Request.Query["accountId"].ToString();
 
@@ -44,6 +48,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapSmsEndpoints();
+app.MapHistoryEndpoints();
 
 app.Run();
 
