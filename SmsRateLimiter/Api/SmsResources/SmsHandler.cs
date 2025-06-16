@@ -6,9 +6,8 @@ public static class SmsHandler
     private static readonly HttpClient _client = new HttpClient();
 
     public static async Task<IResult> SendSms(
-        HttpContext context, 
-        SmsRequest request, 
-        SmsResourceManager resourceManager,
+        HttpContext context,
+        SmsRequest request,
         HistoryLog historyLog
     )
     {
@@ -22,29 +21,12 @@ public static class SmsHandler
         // Store a record of the event
         historyLog.AddEntry(request, accountId);
 
-        var resource = resourceManager.GetOrCreate(request.PhoneNumber);
+        var response = await MockSendSms(request.Message);
 
-        return await WithResourceLock(resource, async () =>
+        return Results.Ok(new SmsResponse
         {
-            if (resource.RequestsRemaining <= 0)
-            {
-                return Results.Json(new SmsResponse
-                {
-                    RemainingRequests = 0,
-                    RequestWasSent = false,
-                    Message = "No more credits remaining",
-                }, statusCode: StatusCodes.Status429TooManyRequests);
-            }
-
-            var response = await MockSendSms(request.Message);
-
-            resource.RequestsRemaining--;
-
-            return Results.Ok(new SmsResponse
-            {
-                RemainingRequests = resource.RequestsRemaining,
-                RequestWasSent = true,
-            });
+            RequestWasSent = true,
+            Message = $"Sent message from {request.PhoneNumber}"
         });
     }
 
@@ -72,18 +54,5 @@ public static class SmsHandler
         await Task.Delay(500);
 
         return Results.Ok(content);
-    }
-
-    private static async Task<IResult> WithResourceLock(SmsResource resource, Func<Task<IResult>> action)
-    {
-        await resource.Lock.WaitAsync();
-        try
-        {
-            return await action();
-        }
-        finally
-        {
-            resource.Lock.Release();
-        }
     }
 }

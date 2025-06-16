@@ -4,11 +4,15 @@ namespace SmsRateLimiter.Api.SmsResources
 {
     public class SmsRequest
     {
-        public SmsRequest(string phoneNumber, string message)
+        public SmsRequest(string phoneNumber, string accountId, string message)
         {
+            AccountId = accountId;
             PhoneNumber = phoneNumber;
             Message = message;
         }
+
+        [JsonPropertyName("accountId")]
+        public string AccountId { get; set; }
 
         [JsonPropertyName("phoneNumber")]
         public string PhoneNumber { get; set; }

@@ -27,18 +27,18 @@ namespace SmsRateLimiter.Tests
         {
             var response = await client.PostAsJsonAsync(
                 "/api/sms/send",
-                new SmsRequest("1234567890", "Hello there")
+                new SmsRequest("1234567890", "abc", "Hello there")
             );
 
             response.EnsureSuccessStatusCode();
             var smsResponse = await response.Content.ReadFromJsonAsync<SmsResponse>();
-            Assert.That(smsResponse?.RemainingRequests, Is.EqualTo(4));
         }
 
         [Test]
         public async Task SendLimitPerPhoneNumberIsCapped()
         {
-            var maxRequests = 5;
+            const int maxRequests = 5;
+            const string phoneNumber = "1234567890";
             var requestsSent = 0;
 
             // Reach the maximum number of requests
@@ -46,23 +46,55 @@ namespace SmsRateLimiter.Tests
             {
                 var response = await client.PostAsJsonAsync(
                     "/api/sms/send",
-                    new SmsRequest("1234567890", "Hello there")
+                    // Change the provider each time to ensure that the phone number is
+                    // blocked from sending too many requests.
+                    new SmsRequest(phoneNumber, $"{requestsSent}abc", "Hello there")
                 );
 
                 response.EnsureSuccessStatusCode();
                 requestsSent++;
                 var smsResponse = await response.Content.ReadFromJsonAsync<SmsResponse>();
 
-                // Check the number of remaining credits
-                Assert.That(smsResponse?.RemainingRequests, Is.EqualTo(maxRequests - requestsSent));
                 // Ensure that the message was sent
-                Assert.IsTrue(smsResponse.RequestWasSent);
+                Assert.IsTrue(smsResponse?.RequestWasSent);
             } while (requestsSent < maxRequests);
 
             // Send another request and ensure that it is rejected
             var failingResponse = await client.PostAsJsonAsync(
                 "/api/sms/send",
-                new SmsRequest("1234567890", "Hello there")
+                new SmsRequest(phoneNumber, "abc", "Hello there")
+            );
+
+            Assert.That(failingResponse.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
+        }
+
+        [Test]
+        public async Task SendLimitPerAccountIsCapped()
+        {
+            const int maxRequests = 5;
+            const string accountId = "abc";
+            var requestsSent = 0;
+
+            // Reach the maximum number of requests
+            do
+            {
+                var response = await client.PostAsJsonAsync(
+                    "/api/sms/send",
+                    new SmsRequest($"123456789{requestsSent}", accountId, "Hello there")
+                );
+
+                response.EnsureSuccessStatusCode();
+                requestsSent++;
+                var smsResponse = await response.Content.ReadFromJsonAsync<SmsResponse>();
+
+                // Ensure that the message was sent
+                Assert.IsTrue(smsResponse?.RequestWasSent);
+            } while (requestsSent < maxRequests);
+
+            // Send another request and ensure that it is rejected
+            var failingResponse = await client.PostAsJsonAsync(
+                "/api/sms/send",
+                new SmsRequest($"123456789{requestsSent}", accountId, "Hello there")
             );
 
             Assert.That(failingResponse.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
