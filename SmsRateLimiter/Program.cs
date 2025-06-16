@@ -31,9 +31,11 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 5,                  // 5 requests
                 Window = TimeSpan.FromSeconds(1), // per second
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0
+                QueueLimit = 3
             });
     });
+
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 });
 
 var app = builder.Build();
