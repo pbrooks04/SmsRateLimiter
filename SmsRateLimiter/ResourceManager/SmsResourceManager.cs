@@ -28,6 +28,7 @@ public class SmsResourceManager
         {
             foreach (var kvp in _resources)
             {
+                // Remove entries that have not been accessed within the expiration time
                 if (DateTime.UtcNow - kvp.Value.LastAccessed > _expiration)
                 {
                     _resources.TryRemove(kvp.Key, out _);
