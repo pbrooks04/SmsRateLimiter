@@ -16,10 +16,8 @@ public static class SmsHandler
             return Results.BadRequest(new { error = "Phone number is required" });
         }
 
-        var accountId = context.Request.Query["accountId"].ToString();
-
         // Store a record of the event
-        historyLog.AddEntry(request, accountId);
+        historyLog.AddEntry(request);
 
         var response = await MockSendSms(request.Message);
 

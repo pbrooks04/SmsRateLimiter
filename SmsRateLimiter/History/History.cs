@@ -8,10 +8,10 @@ public class HistoryLog
     private int _maxNumberOfRecords = 500;
 
     public HistoryLog() { }
-    public void AddEntry(SmsRequest smsRequest, string accountId)
+    public void AddEntry(SmsRequest smsRequest)
     {
         // Keep new entries at the start
-        _entries.Insert(0, new HistoryEntry(smsRequest, accountId));
+        _entries.Insert(0, new HistoryEntry(smsRequest));
         if (_entries.Count > _maxNumberOfRecords)
         {
             // Keep the history to a predefined number of entries
@@ -27,12 +27,10 @@ public class HistoryEntry
 {
     public SmsRequest smsRequest { get; }
     public DateTime dateTime { get; }
-    public string accountId { get; }
 
-    public HistoryEntry(SmsRequest smsRequest, string accountId)
+    public HistoryEntry(SmsRequest smsRequest)
     {
         this.smsRequest = smsRequest;
-        this.accountId = accountId;
         this.dateTime = DateTime.UtcNow;
     }
 }
