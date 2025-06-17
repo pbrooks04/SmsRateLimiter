@@ -1,4 +1,5 @@
 ﻿using SmsRateLimiter.Api.SmsResources;
+using SmsRateLimiter.History;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Threading.RateLimiting;
@@ -35,7 +36,7 @@ namespace SmsRateLimiter.RateLimiterMiddleware
             StartCleanupLoop();
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, HistoryLog historyLog)
         {
             // Only intercept JSON POST requests.
             if (context.Request.Method != HttpMethods.Post ||
@@ -83,6 +84,7 @@ namespace SmsRateLimiter.RateLimiterMiddleware
             {
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 await context.Response.WriteAsync("Rate limit exceeded (account)");
+                historyLog.AddEntry(request, "rejected");
                 return;
             }
 
@@ -91,6 +93,7 @@ namespace SmsRateLimiter.RateLimiterMiddleware
             {
                 context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 await context.Response.WriteAsync("Rate limit exceeded (phone)");
+                historyLog.AddEntry(request, "rejected");
                 return;
             }
 

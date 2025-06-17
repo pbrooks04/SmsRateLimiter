@@ -17,7 +17,7 @@ public static class SmsHandler
         }
 
         // Store a record of the event
-        historyLog.AddEntry(request);
+        historyLog.AddEntry(request, "success");
 
         var response = await MockSendSms(request.Message);
 
