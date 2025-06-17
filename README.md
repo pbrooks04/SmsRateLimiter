@@ -4,7 +4,7 @@ The front end to this project can be found here: https://github.com/pbrooks04/Sm
 
 ## Purpose
 
-This microservice is intended to serve as middleware for an SMS sending program. The goal of this microservice is to restrict request rate limits by two variables, `phoneNumber` and `accountId`. Requests are limited by these values and sending too many requests within a timeframe with a constant `phoneNumber` or `accountId` causes the service to return a 429 response. 
+This microservice is intended to serve as middleware for an SMS sending program. The goal of this microservice is to restrict request rate limits by two variables, `phoneNumber` and `accountId`. Requests are limited by these values and sending too many requests within a timeframe with a constant `phoneNumber` or `accountId` causes the service to return a 429 response.
 
 ## Endpoints
 
