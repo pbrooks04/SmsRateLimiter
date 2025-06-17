@@ -27,4 +27,9 @@ GET /api/history
 Tests are included in `SmsRateLimiter.Test`. They ensure that the service is able to send an SMS and that rates are applied based on the `phoneNumber` and `accountId` fields.
 
 ## Running the program
-At the time of writing, I've just been running it locally in development mode with Visual Studio.
+It can run locally in development mode with Visual Studio or with docker.
+
+```
+docker build -t smsratelimiter .
+docker run -it --rm -p 7228:8080 --name smsratelimitercontainer smsratelimiter
+```
