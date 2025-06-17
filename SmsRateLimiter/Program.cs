@@ -15,27 +15,29 @@ builder.Services.AddRateLimiter(options =>
 {
     options.AddPolicy("RateLimitPolicy", httpContext =>
     {
-        // ToDo: This will have to change. It's only being used by `History` and
-        // this endpoint doesn't use `accountId`.
-        var accountId = httpContext.Request.Query["accountId"].ToString();
-
-        var partitionKey = !string.IsNullOrEmpty(accountId)
-            ? accountId
-            : httpContext.User.Identity?.Name
-                ?? httpContext.Connection.RemoteIpAddress?.ToString()
-                ?? "anonymous";
-
         return RateLimitPartition.GetFixedWindowLimiter(
-            partitionKey: partitionKey,
+            partitionKey: "rateLimitPartitionKey",
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
-                Window = TimeSpan.FromSeconds(10),
+                PermitLimit = 10,
+                Window = TimeSpan.FromSeconds(1),
                 QueueLimit = 0
             });
     });
 
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend",
+        policy =>
+        {
+            // Just to allow the front end to access this service
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 var app = builder.Build();
@@ -55,6 +57,8 @@ app.UseWhen(
     {
         appBuilder.UseMiddleware<RateLimiterMiddleware>();
     });
+
+app.UseCors("Frontend");
 
 
 // Map endpoints
